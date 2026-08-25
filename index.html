@@ -2,50 +2,347 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TraXall Kostenrapportage Pro</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-body{font-family:"Century Gothic",sans-serif;background:#eef3f9;margin:0;color:#213153}
-.header{background:#213153;color:#fff;padding:25px}
-.container{max-width:1400px;margin:auto;padding:20px}
-.section{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;page-break-inside:avoid}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.kpi{background:#213153;color:white;padding:15px;border-radius:10px}
-canvas{max-height:380px !important}
-.table-wrap{overflow:auto}.report-table{width:100%;border-collapse:collapse;font-size:12px}.report-table th{background:#213153;color:#fff}.report-table th,.report-table td{border:1px solid #d8dce5;padding:6px}
-@media print {.section{break-inside:avoid-page}}
+:root{
+    --traxall-dark:#213153;
+    --traxall-light:#eef3f9;
+    --traxall-border:#d8dce5;
+    --report-width:1000px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+    font-family:"Century Gothic","Tw Cen MT",Arial,sans-serif;
+    background:var(--traxall-light);
+    color:var(--traxall-dark);
+}
+.header{
+    background:var(--traxall-dark);
+    color:#fff;
+    padding:20px 24px;
+}
+.header h1{margin:0 0 14px;font-size:26px}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+button,input[type="file"]::file-selector-button{
+    font-family:inherit;
+}
+button{
+    border:0;
+    border-radius:6px;
+    padding:10px 16px;
+    background:#fff;
+    color:var(--traxall-dark);
+    font-weight:700;
+    cursor:pointer;
+}
+button:disabled{opacity:.55;cursor:not-allowed}
+.status{font-size:13px;margin-left:4px}
+.container{
+    width:100%;
+    max-width:var(--report-width);
+    margin:0 auto;
+    padding:15px;
+}
+#report{width:100%}
+.section{
+    width:100%;
+    min-width:0;
+    background:#fff;
+    border-radius:10px;
+    padding:18px;
+    margin:0 0 16px;
+    page-break-inside:avoid;
+    break-inside:avoid-page;
+    overflow:hidden;
+}
+h2{
+    margin:0 0 14px;
+    padding-bottom:8px;
+    color:var(--traxall-dark);
+    font-size:20px;
+    border-bottom:2px solid var(--traxall-dark);
+}
+.kpis{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+}
+.kpi{
+    min-width:0;
+    background:var(--traxall-dark);
+    color:#fff;
+    padding:14px;
+    border-radius:8px;
+    text-align:center;
+    overflow-wrap:anywhere;
+}
+.kpi strong{display:block;margin-top:5px;font-size:19px}
+.chart-container{
+    position:relative;
+    width:100%;
+    max-width:100%;
+    height:300px;
+    min-height:300px;
+    overflow:hidden;
+}
+.chart-container canvas{
+    display:block;
+    width:100% !important;
+    max-width:100% !important;
+    height:300px !important;
+    max-height:300px !important;
+}
+.table-wrap{
+    width:100%;
+    max-width:100%;
+    overflow:hidden;
+}
+.report-table{
+    width:100%;
+    max-width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+    font-size:11px;
+}
+.report-table th{
+    background:var(--traxall-dark);
+    color:#fff;
+    font-weight:700;
+}
+.report-table th,.report-table td{
+    border:1px solid var(--traxall-border);
+    padding:6px;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+}
+.report-table th:first-child,.report-table td:first-child{width:68%}
+.report-table th:last-child,.report-table td:last-child{width:32%;text-align:right}
+.report-table tr:nth-child(even){background:#f7f9fc}
+.pdf-mode{
+    width:190mm !important;
+    max-width:190mm !important;
+    margin:0 !important;
+    padding:0 !important;
+    background:#fff !important;
+}
+.pdf-mode .section{
+    border-radius:0;
+    box-shadow:none;
+    margin-bottom:5mm;
+    padding:6mm;
+}
+.pdf-mode .chart-container{
+    height:72mm !important;
+    min-height:72mm !important;
+}
+.pdf-mode .chart-container canvas{
+    height:72mm !important;
+    max-height:72mm !important;
+}
+@media(max-width:700px){
+    .container{padding:10px}
+    .kpis{grid-template-columns:1fr}
+    .chart-container,.chart-container canvas{height:260px !important;min-height:260px}
+}
+@media print{
+    body{background:#fff}
+    .header{display:none}
+    .container{width:190mm;max-width:190mm;padding:0;margin:0}
+    .section{page-break-inside:avoid;break-inside:avoid-page;border-radius:0}
+    .chart-container,.chart-container canvas{height:72mm !important;min-height:72mm;max-height:72mm !important}
+}
 </style>
-</head><body>
-<div class='header'><h1>TraXall Kostenrapportage</h1><input type='file' id='file'><button onclick='analyse()'>Analyse</button><button onclick='pdf()'>PDF</button></div>
-<div class='container'><div id='report'>
-<div class='section'><h2>Management Summary</h2><div id='summary'></div></div>
-<div class='section'><div class='kpis' id='kpis'></div></div>
-<div class='section'><canvas id='monthChart'></canvas></div>
-<div class='section'><canvas id='supplierChart'></canvas></div>
-<div class='section'><canvas id='categoryChart'></canvas></div>
-<div class='section'><canvas id='vehicleChart'></canvas></div>
-<div class='section'><h2>Leveranciers</h2><div class='table-wrap'><table class='report-table' id='supTable'></table></div></div>
-</div></div>
+</head>
+<body>
+<div class="header">
+    <h1>TraXall Kostenrapportage</h1>
+    <div class="controls">
+        <input type="file" id="file" accept=".xlsx,.xls">
+        <button type="button" onclick="analyse()">Analyse</button>
+        <button type="button" id="pdfButton" onclick="pdf()" disabled>PDF downloaden</button>
+        <span class="status" id="status">Selecteer een Excel-bestand.</span>
+    </div>
+</div>
+<div class="container">
+    <div id="report">
+        <div class="section">
+            <h2>Management Summary</h2>
+            <div id="summary">Upload een Excel-bestand om de rapportage op te bouwen.</div>
+        </div>
+        <div class="section"><div class="kpis" id="kpis"></div></div>
+        <div class="section"><h2>Kosten per maand</h2><div class="chart-container"><canvas id="monthChart"></canvas></div></div>
+        <div class="section"><h2>Top 15 leveranciers</h2><div class="chart-container"><canvas id="supplierChart"></canvas></div></div>
+        <div class="section"><h2>Kosten per kostensoort</h2><div class="chart-container"><canvas id="categoryChart"></canvas></div></div>
+        <div class="section"><h2>Top 10 voertuigen</h2><div class="chart-container"><canvas id="vehicleChart"></canvas></div></div>
+        <div class="section">
+            <h2>Leveranciers</h2>
+            <div class="table-wrap"><table class="report-table" id="supTable"></table></div>
+        </div>
+    </div>
+</div>
 <script>
 let rows=[];
-function parseAmount(v){return parseFloat(String(v??0).replace(/\./g,'').replace(',','.'))||0;}
-function excelDate(v){if(typeof v==='number'){let d=new Date((v-25569)*86400*1000);return d;} let p=String(v).split(/[-/]/); if(p.length===3){return new Date(p[2],p[1]-1,p[0]);} return new Date(v);}
-function monthKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
-async function analyse(){const f=document.getElementById('file').files[0];const r=new FileReader();r.onload=e=>{const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});build();};r.readAsArrayBuffer(f);}
-function build(){let total=0,month={},supplier={},category={},vehicle={};rows.forEach(r=>{let amt=parseAmount(r.HT); total+=amt; let d=excelDate(r.Date); if(!isNaN(d)) month[monthKey(d)]=(month[monthKey(d)]||0)+amt; supplier[r.Fournisseur||'Onbekend']=(supplier[r.Fournisseur||'Onbekend']||0)+amt; category[r.Type_cout||'Onbekend']=(category[r.Type_cout||'Onbekend']||0)+amt; vehicle[r.Immat||'Onbekend']=(vehicle[r.Immat||'Onbekend']||0)+amt;});
-let months=Object.keys(month).sort(); let latest=month[months[months.length-1]]||0; let previous=month[months[months.length-2]]||0; let diff=latest-previous;
-let topSup=Object.entries(supplier).sort((a,b)=>b[1]-a[1])[0]; let topCat=Object.entries(category).sort((a,b)=>b[1]-a[1])[0];
-document.getElementById('summary').innerHTML=`Totale kosten: € ${total.toLocaleString('nl-NL')}<br>Laatste maand: € ${latest.toLocaleString('nl-NL')}<br>Verschil t.o.v. vorige maand: € ${diff.toLocaleString('nl-NL')}<br>Grootste leverancier: ${topSup?.[0]}<br>Grootste kostensoort: ${topCat?.[0]}`;
-document.getElementById('kpis').innerHTML=`<div class=kpi>Totaal<br>€ ${Math.round(total).toLocaleString('nl-NL')}</div><div class=kpi>Factuurregels<br>${rows.length}</div><div class=kpi>Leveranciers<br>${Object.keys(supplier).length}</div><div class=kpi>Kostensoorten<br>${Object.keys(category).length}</div>`;
-new Chart(monthChart,{type:'line',data:{labels:months,datasets:[{label:'Kosten per maand',data:months.map(m=>month[m])}]}});
-new Chart(supplierChart,{type:'bar',data:{labels:Object.keys(supplier),datasets:[{data:Object.values(supplier)}]}});
-new Chart(categoryChart,{type:'pie',data:{labels:Object.keys(category),datasets:[{data:Object.values(category)}]}});
-let topVeh=Object.entries(vehicle).sort((a,b)=>b[1]-a[1]).slice(0,10);
-new Chart(vehicleChart,{type:'bar',data:{labels:topVeh.map(x=>x[0]),datasets:[{data:topVeh.map(x=>x[1])}]}});
-let t='<tr><th>Leverancier</th><th>Bedrag</th></tr>';Object.entries(supplier).sort((a,b)=>b[1]-a[1]).forEach(x=>t+=`<tr><td>${x[0]}</td><td>€ ${x[1].toLocaleString('nl-NL')}</td></tr>`); document.getElementById('supTable').innerHTML=t;
+const charts={};
+const eur=new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2});
+const monthFmt=new Intl.DateTimeFormat('nl-NL',{month:'short',year:'numeric'});
+
+function parseAmount(v){
+    if(typeof v==='number' && Number.isFinite(v)) return v;
+    let s=String(v??'').trim().replace(/\s/g,'').replace(/€/g,'');
+    if(!s) return 0;
+    if(s.includes(',') && s.includes('.')){
+        if(s.lastIndexOf(',')>s.lastIndexOf('.')) s=s.replace(/\./g,'').replace(',','.');
+        else s=s.replace(/,/g,'');
+    }else if(s.includes(',')){
+        s=s.replace(/\./g,'').replace(',','.');
+    }
+    const n=Number(s);
+    return Number.isFinite(n)?n:0;
 }
-function pdf(){html2pdf().set({margin:[8,8,8,8],filename:'TraXall_Kostenrapportage.pdf',pagebreak:{mode:['css','legacy']},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(document.getElementById('report')).save();}
-</script></body></html>
+function excelDate(v){
+    if(v instanceof Date && !isNaN(v)) return new Date(v.getFullYear(),v.getMonth(),v.getDate());
+    if(typeof v==='number' && Number.isFinite(v)){
+        const parsed=XLSX.SSF.parse_date_code(v);
+        return parsed?new Date(parsed.y,parsed.m-1,parsed.d):null;
+    }
+    const s=String(v??'').trim();
+    if(!s) return null;
+    let m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);
+    if(m) return new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));
+    m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+    if(m) return new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+    const d=new Date(s);
+    return isNaN(d)?null:d;
+}
+function monthKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+function monthLabel(key){const [y,m]=key.split('-').map(Number);return monthFmt.format(new Date(y,m-1,1)).replace('.','');}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function destroyCharts(){Object.keys(charts).forEach(k=>{charts[k].destroy();delete charts[k];});}
+function baseOptions(horizontal=false){
+    return {
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:false,
+        indexAxis:horizontal?'y':'x',
+        layout:{padding:{top:5,right:10,bottom:5,left:5}},
+        plugins:{legend:{display:false}},
+        scales:{
+            x:{ticks:{autoSkip:true,maxRotation:0,font:{family:'Century Gothic',size:10}},grid:{display:false}},
+            y:{ticks:{font:{family:'Century Gothic',size:10}},beginAtZero:true}
+        }
+    };
+}
+async function analyse(){
+    const f=document.getElementById('file').files[0];
+    if(!f){document.getElementById('status').textContent='Kies eerst een Excel-bestand.';return;}
+    document.getElementById('status').textContent='Bestand wordt verwerkt...';
+    const buffer=await f.arrayBuffer();
+    const wb=XLSX.read(buffer,{type:'array',cellDates:true});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
+    build();
+    document.getElementById('pdfButton').disabled=false;
+    document.getElementById('status').textContent=`${rows.length.toLocaleString('nl-NL')} regels verwerkt.`;
+}
+function build(){
+    destroyCharts();
+    let total=0;
+    const month={},supplier={},category={},vehicle={};
+    rows.forEach(r=>{
+        const amt=parseAmount(r.HT);
+        total+=amt;
+        const d=excelDate(r.Date);
+        if(d && !isNaN(d)){
+            const key=monthKey(d);
+            month[key]=(month[key]||0)+amt;
+        }
+        const sup=String(r.Fournisseur||'Onbekend').trim()||'Onbekend';
+        const cat=String(r.Type_cout||'Onbekend').trim()||'Onbekend';
+        const veh=String(r.Immat||'Onbekend').trim()||'Onbekend';
+        supplier[sup]=(supplier[sup]||0)+amt;
+        category[cat]=(category[cat]||0)+amt;
+        vehicle[veh]=(vehicle[veh]||0)+amt;
+    });
+    const months=Object.keys(month).sort();
+    const latest=months.length?month[months.at(-1)]:0;
+    const previous=months.length>1?month[months.at(-2)]:0;
+    const diff=latest-previous;
+    const pct=previous!==0?(diff/Math.abs(previous))*100:null;
+    const topSuppliers=Object.entries(supplier).sort((a,b)=>b[1]-a[1]);
+    const topCategories=Object.entries(category).sort((a,b)=>b[1]-a[1]);
+    const topVehicles=Object.entries(vehicle).filter(([k])=>k!=='Onbekend').sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const topSup=topSuppliers[0]||['Geen data',0];
+    const topCat=topCategories[0]||['Geen data',0];
+    const latestLabel=months.length?monthLabel(months.at(-1)):'geen geldige maand';
+    const changeText=pct===null?'Niet berekenbaar':`${diff>=0?'stijging':'daling'} van ${Math.abs(pct).toLocaleString('nl-NL',{maximumFractionDigits:1})}% (${eur.format(Math.abs(diff))})`;
+    document.getElementById('summary').innerHTML=`
+        De totale kosten in het bestand bedragen <strong>${eur.format(total)}</strong>.<br>
+        De kosten in ${esc(latestLabel)} bedragen <strong>${eur.format(latest)}</strong>.<br>
+        Ten opzichte van de voorafgaande beschikbare maand is sprake van een <strong>${esc(changeText)}</strong>.<br>
+        De grootste leverancier is <strong>${esc(topSup[0])}</strong> met ${eur.format(topSup[1])}.<br>
+        De grootste kostensoort is <strong>${esc(topCat[0])}</strong> met ${eur.format(topCat[1])}.`;
+    document.getElementById('kpis').innerHTML=`
+        <div class="kpi">Totale kosten<strong>${eur.format(total)}</strong></div>
+        <div class="kpi">Factuurregels<strong>${rows.length.toLocaleString('nl-NL')}</strong></div>
+        <div class="kpi">Leveranciers<strong>${Object.keys(supplier).length.toLocaleString('nl-NL')}</strong></div>
+        <div class="kpi">Kostensoorten<strong>${Object.keys(category).length.toLocaleString('nl-NL')}</strong></div>`;
+    charts.month=new Chart(document.getElementById('monthChart'),{
+        type:'line',
+        data:{labels:months.map(monthLabel),datasets:[{label:'Kosten per maand',data:months.map(m=>month[m]),borderColor:'#213153',backgroundColor:'rgba(33,49,83,.12)',fill:true,tension:.25,pointRadius:3}]},
+        options:{...baseOptions(false),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>eur.format(c.raw)}}}}
+    });
+    const top15=topSuppliers.slice(0,15);
+    charts.supplier=new Chart(document.getElementById('supplierChart'),{
+        type:'bar',
+        data:{labels:top15.map(x=>x[0]),datasets:[{data:top15.map(x=>x[1]),backgroundColor:'#213153'}]},
+        options:{...baseOptions(true),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>eur.format(c.raw)}}}}
+    });
+    charts.category=new Chart(document.getElementById('categoryChart'),{
+        type:'doughnut',
+        data:{labels:topCategories.map(x=>x[0]),datasets:[{data:topCategories.map(x=>x[1]),backgroundColor:['#213153','#3f5f91','#6684ad','#8da7c9','#b4c9df','#d5e0ed','#677185','#9ba4b4']}]},
+        options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{family:'Century Gothic',size:10}}},tooltip:{callbacks:{label:c=>`${c.label}: ${eur.format(c.raw)}`}}}}
+    });
+    charts.vehicle=new Chart(document.getElementById('vehicleChart'),{
+        type:'bar',
+        data:{labels:topVehicles.map(x=>x[0]),datasets:[{data:topVehicles.map(x=>x[1]),backgroundColor:'#3f5f91'}]},
+        options:{...baseOptions(false),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>eur.format(c.raw)}}}}
+    });
+    document.getElementById('supTable').innerHTML='<thead><tr><th>Leverancier</th><th>Bedrag excl. btw</th></tr></thead><tbody>'+topSuppliers.map(x=>`<tr><td>${esc(x[0])}</td><td>${eur.format(x[1])}</td></tr>`).join('')+'</tbody>';
+}
+async function pdf(){
+    const report=document.getElementById('report');
+    const button=document.getElementById('pdfButton');
+    const status=document.getElementById('status');
+    button.disabled=true;
+    status.textContent='PDF wordt opgebouwd...';
+    report.classList.add('pdf-mode');
+    Object.values(charts).forEach(c=>c.resize());
+    await document.fonts.ready;
+    await new Promise(resolve=>setTimeout(resolve,250));
+    try{
+        await html2pdf().set({
+            margin:[10,10,10,10],
+            filename:'TraXall_Kostenrapportage.pdf',
+            image:{type:'jpeg',quality:.98},
+            html2canvas:{scale:2,useCORS:true,scrollX:0,scrollY:0,windowWidth:report.scrollWidth,backgroundColor:'#ffffff'},
+            pagebreak:{mode:['avoid-all','css','legacy'],avoid:['.section','.chart-container','canvas']},
+            jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true}
+        }).from(report).save();
+        status.textContent='PDF is gegenereerd.';
+    }catch(err){
+        console.error(err);
+        status.textContent='PDF-export mislukt. Open de browserconsole voor details.';
+    }finally{
+        report.classList.remove('pdf-mode');
+        Object.values(charts).forEach(c=>c.resize());
+        button.disabled=false;
+    }
+}
+</script>
+</body>
+</html>
