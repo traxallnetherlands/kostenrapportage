@@ -12,7 +12,7 @@
     --traxall-dark:#213153;
     --traxall-light:#eef3f9;
     --traxall-border:#d8dce5;
-    --report-width:1000px;
+    --report-width:1200px;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -86,16 +86,16 @@ h2{
     position:relative;
     width:100%;
     max-width:100%;
-    height:300px;
-    min-height:300px;
+    height:450px;
+    min-height:450px;
     overflow:hidden;
 }
 .chart-container canvas{
     display:block;
     width:100% !important;
     max-width:100% !important;
-    height:300px !important;
-    max-height:300px !important;
+    height:450px !important;
+    max-height:450px !important;
 }
 .table-wrap{
     width:100%;
@@ -123,27 +123,6 @@ h2{
 .report-table th:first-child,.report-table td:first-child{width:68%}
 .report-table th:last-child,.report-table td:last-child{width:32%;text-align:right}
 .report-table tr:nth-child(even){background:#f7f9fc}
-.pdf-mode{
-    width:190mm !important;
-    max-width:190mm !important;
-    margin:0 !important;
-    padding:0 !important;
-    background:#fff !important;
-}
-.pdf-mode .section{
-    border-radius:0;
-    box-shadow:none;
-    margin-bottom:5mm;
-    padding:6mm;
-}
-.pdf-mode .chart-container{
-    height:72mm !important;
-    min-height:72mm !important;
-}
-.pdf-mode .chart-container canvas{
-    height:72mm !important;
-    max-height:72mm !important;
-}
 @media(max-width:700px){
     .container{padding:10px}
     .kpis{grid-template-columns:1fr}
@@ -152,9 +131,9 @@ h2{
 @media print{
     body{background:#fff}
     .header{display:none}
-    .container{width:190mm;max-width:190mm;padding:0;margin:0}
+    .container{width:100%;max-width:100%;padding:0;margin:0}
     .section{page-break-inside:avoid;break-inside:avoid-page;border-radius:0}
-    .chart-container,.chart-container canvas{height:72mm !important;min-height:72mm;max-height:72mm !important}
+    .chart-container,.chart-container canvas{height:115mm !important;min-height:115mm;max-height:115mm !important}
 }
 </style>
 </head>
@@ -320,7 +299,6 @@ async function pdf(){
     const status=document.getElementById('status');
     button.disabled=true;
     status.textContent='PDF wordt opgebouwd...';
-    report.classList.add('pdf-mode');
     Object.values(charts).forEach(c=>c.resize());
     await document.fonts.ready;
     await new Promise(resolve=>setTimeout(resolve,250));
@@ -329,8 +307,8 @@ async function pdf(){
             margin:[10,10,10,10],
             filename:'TraXall_Kostenrapportage.pdf',
             image:{type:'jpeg',quality:.98},
-            html2canvas:{scale:2,useCORS:true,scrollX:0,scrollY:0,windowWidth:report.scrollWidth,backgroundColor:'#ffffff'},
-            pagebreak:{mode:['avoid-all','css','legacy'],avoid:['.section','.chart-container','canvas']},
+            html2canvas:{scale:1.3,useCORS:true,scrollX:0,scrollY:0,backgroundColor:'#ffffff'},
+            pagebreak:{mode:['css','legacy'],avoid:['.chart-container','canvas']},
             jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true}
         }).from(report).save();
         status.textContent='PDF is gegenereerd.';
@@ -338,8 +316,7 @@ async function pdf(){
         console.error(err);
         status.textContent='PDF-export mislukt. Open de browserconsole voor details.';
     }finally{
-        report.classList.remove('pdf-mode');
-        Object.values(charts).forEach(c=>c.resize());
+            Object.values(charts).forEach(c=>c.resize());
         button.disabled=false;
     }
 }
