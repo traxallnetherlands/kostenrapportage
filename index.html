@@ -3,323 +3,103 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TraXall Kostenrapportage Pro</title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>TraXall Kostenrapportage</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-:root{
-    --traxall-dark:#213153;
-    --traxall-light:#eef3f9;
-    --traxall-border:#d8dce5;
-    --report-width:1200px;
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
-    font-family:"Century Gothic","Tw Cen MT",Arial,sans-serif;
-    background:var(--traxall-light);
-    color:var(--traxall-dark);
-}
-.header{
-    background:var(--traxall-dark);
-    color:#fff;
-    padding:20px 24px;
-}
-.header h1{margin:0 0 14px;font-size:26px}
-.controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-button,input[type="file"]::file-selector-button{
-    font-family:inherit;
-}
-button{
-    border:0;
-    border-radius:6px;
-    padding:10px 16px;
-    background:#fff;
-    color:var(--traxall-dark);
-    font-weight:700;
-    cursor:pointer;
-}
-button:disabled{opacity:.55;cursor:not-allowed}
-.status{font-size:13px;margin-left:4px}
-.container{
-    width:100%;
-    max-width:var(--report-width);
-    margin:0 auto;
-    padding:15px;
-}
-#report{width:100%}
-.section{
-    width:100%;
-    min-width:0;
-    background:#fff;
-    border-radius:10px;
-    padding:18px;
-    margin:0 0 16px;
-    page-break-inside:avoid;
-    break-inside:avoid-page;
-    overflow:hidden;
-}
-h2{
-    margin:0 0 14px;
-    padding-bottom:8px;
-    color:var(--traxall-dark);
-    font-size:20px;
-    border-bottom:2px solid var(--traxall-dark);
-}
-.kpis{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:10px;
-}
-.kpi{
-    min-width:0;
-    background:var(--traxall-dark);
-    color:#fff;
-    padding:14px;
-    border-radius:8px;
-    text-align:center;
-    overflow-wrap:anywhere;
-}
-.kpi strong{display:block;margin-top:5px;font-size:19px}
-.chart-container{
-    position:relative;
-    width:100%;
-    max-width:100%;
-    height:450px;
-    min-height:450px;
-    overflow:hidden;
-}
-.chart-container canvas{
-    display:block;
-    width:100% !important;
-    max-width:100% !important;
-    height:450px !important;
-    max-height:450px !important;
-}
-.table-wrap{
-    width:100%;
-    max-width:100%;
-    overflow:hidden;
-}
-.report-table{
-    width:100%;
-    max-width:100%;
-    border-collapse:collapse;
-    table-layout:fixed;
-    font-size:11px;
-}
-.report-table th{
-    background:var(--traxall-dark);
-    color:#fff;
-    font-weight:700;
-}
-.report-table th,.report-table td{
-    border:1px solid var(--traxall-border);
-    padding:6px;
-    word-break:break-word;
-    overflow-wrap:anywhere;
-}
-.report-table th:first-child,.report-table td:first-child{width:68%}
-.report-table th:last-child,.report-table td:last-child{width:32%;text-align:right}
-.report-table tr:nth-child(even){background:#f7f9fc}
-@media(max-width:700px){
-    .container{padding:10px}
-    .kpis{grid-template-columns:1fr}
-    .chart-container,.chart-container canvas{height:260px !important;min-height:260px}
-}
-@media print{
-    body{background:#fff}
-    .header{display:none}
-    .container{width:100%;max-width:100%;padding:0;margin:0}
-    .section{page-break-inside:avoid;break-inside:avoid-page;border-radius:0}
-    .chart-container,.chart-container canvas{height:115mm !important;min-height:115mm;max-height:115mm !important}
-}
+:root{--navy:#213153;--blue:#4f73a5;--sky:#91abc9;--pale:#eef3f9;--line:#d8dfe9;--text:#18243b;--muted:#68758a;--white:#fff}
+*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:"Century Gothic","Tw Cen MT",Arial,sans-serif;background:var(--pale);color:var(--text)}
+.header{position:sticky;top:0;z-index:10;background:var(--navy);color:#fff;padding:16px 24px;box-shadow:0 2px 12px #0002}.header h1{margin:0 0 12px;font-size:24px}.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.upload{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--navy);padding:9px 12px;border-radius:7px;font-weight:700;cursor:pointer}.upload input{display:none}.file-name{font-size:11px;font-weight:400;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.button{border:0;border-radius:7px;padding:10px 15px;font:700 13px inherit;cursor:pointer;background:#fff;color:var(--navy)}.button.primary{background:#82a6d2}.button:disabled{opacity:.5;cursor:not-allowed}.status{font-size:12px;flex-basis:100%;min-height:15px}
+.container{max-width:1280px;margin:auto;padding:18px}.placeholder{background:#fff;border:2px dashed var(--line);border-radius:10px;padding:35px;text-align:center;color:var(--muted)}
+.report-head,.section{background:#fff;border-radius:10px;padding:18px;margin-bottom:16px;break-inside:avoid-page;page-break-inside:avoid}.report-head h1{margin:0;color:var(--navy);font-size:26px}.report-head p{margin:5px 0 0;color:var(--muted)}.section h2{margin:0 0 14px;padding-bottom:8px;border-bottom:2px solid var(--navy);font-size:19px;color:var(--navy)}.chart-wrap{position:relative;width:100%;height:400px}.chart-wrap.tall{height:470px}.chart-wrap canvas{width:100%!important;height:100%!important}.supplier-block{break-before:page;page-break-before:always}.supplier-block:first-child{break-before:auto;page-break-before:auto}.table-block{margin:0 0 14px;break-inside:avoid-page;page-break-inside:avoid}.table-title{font-weight:700;color:var(--navy);margin:0 0 6px}
+.report-table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:10px}.report-table th,.report-table td{border:1px solid var(--line);padding:5px 6px}.report-table th{background:var(--navy);color:#fff;text-align:right}.report-table th:first-child,.report-table td:first-child{text-align:left;width:190px}.report-table td{text-align:right}.report-table tbody tr:nth-child(even){background:#f7f9fc}.report-table .subtotal{font-weight:700;background:#dfe8f3}.note{color:var(--muted);font-size:11px;margin:5px 0 0}.error{color:#b42318}.hidden{display:none!important}
+@media(max-width:750px){.container{padding:10px}.chart-wrap{height:320px}.report-table{font-size:8px}.report-table th:first-child,.report-table td:first-child{width:120px}.header{position:static}}
+@media print{body{background:#fff}.header{display:none}.container{max-width:none;padding:0}.section,.report-head{border-radius:0;box-shadow:none}.chart-wrap{height:115mm}}
 </style>
 </head>
 <body>
-<div class="header">
-    <h1>TraXall Kostenrapportage</h1>
-    <div class="controls">
-        <input type="file" id="file" accept=".xlsx,.xls">
-        <button type="button" onclick="analyse()">Analyse</button>
-        <button type="button" id="pdfButton" onclick="pdf()" disabled>PDF downloaden</button>
-        <span class="status" id="status">Selecteer een Excel-bestand.</span>
-    </div>
-</div>
-<div class="container">
-    <div id="report">
-        <div class="section">
-            <h2>Management Summary</h2>
-            <div id="summary">Upload een Excel-bestand om de rapportage op te bouwen.</div>
-        </div>
-        <div class="section"><div class="kpis" id="kpis"></div></div>
-        <div class="section"><h2>Kosten per maand</h2><div class="chart-container"><canvas id="monthChart"></canvas></div></div>
-        <div class="section"><h2>Top 15 leveranciers</h2><div class="chart-container"><canvas id="supplierChart"></canvas></div></div>
-        <div class="section"><h2>Kosten per kostensoort</h2><div class="chart-container"><canvas id="categoryChart"></canvas></div></div>
-        <div class="section"><h2>Top 10 voertuigen</h2><div class="chart-container"><canvas id="vehicleChart"></canvas></div></div>
-        <div class="section">
-            <h2>Leveranciers</h2>
-            <div class="table-wrap"><table class="report-table" id="supTable"></table></div>
-        </div>
-    </div>
-</div>
+<header class="header">
+  <h1>TraXall Kostenrapportage</h1>
+  <div class="controls">
+    <label class="upload">Kosten vorig jaar<input id="previousFile" type="file" accept=".xlsx,.xls"><span id="previousName" class="file-name">Geen bestand</span></label>
+    <label class="upload">Kosten huidig jaar<input id="currentFile" type="file" accept=".xlsx,.xls"><span id="currentName" class="file-name">Geen bestand</span></label>
+    <button id="analyseBtn" class="button primary" type="button">Rapportage maken</button>
+    <button id="pdfBtn" class="button" type="button" disabled>PDF downloaden</button>
+    <div id="status" class="status">Upload minimaal het bestand ‘Kosten huidig jaar’.</div>
+  </div>
+</header>
+<main class="container">
+  <div id="placeholder" class="placeholder">De rapportage verschijnt hier nadat het huidige jaarbestand is verwerkt.</div>
+  <div id="report" class="hidden"></div>
+</main>
 <script>
-let rows=[];
-const charts={};
-const eur=new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2});
-const monthFmt=new Intl.DateTimeFormat('nl-NL',{month:'short',year:'numeric'});
-
-function parseAmount(v){
-    if(typeof v==='number' && Number.isFinite(v)) return v;
-    let s=String(v??'').trim().replace(/\s/g,'').replace(/€/g,'');
-    if(!s) return 0;
-    if(s.includes(',') && s.includes('.')){
-        if(s.lastIndexOf(',')>s.lastIndexOf('.')) s=s.replace(/\./g,'').replace(',','.');
-        else s=s.replace(/,/g,'');
-    }else if(s.includes(',')){
-        s=s.replace(/\./g,'').replace(',','.');
-    }
-    const n=Number(s);
-    return Number.isFinite(n)?n:0;
+Chart.register(ChartDataLabels);
+const MONTHS=['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+const TYPE_MAP={
+ 'Contractuele kosten':{name:'Contractueel',order:1},'Brandstof':{name:'Brandstof',order:2},'STR':{name:'Huur',order:3},
+ 'Schade kosten':{name:'Schade',order:4},'Boetes':{name:'Boetes',order:5},'Pool kosten':{name:'Pool',order:6},'Variabele kosten':{name:'Variabel',order:7}
+};
+const PRODUCT_ROWS=[
+['Boetes','Boetes','Boetes','Boetes',38],['Boetes','Administratiekosten Boete','Boetes','Administratiekosten boete',39],
+['Variabele kosten','Vervangend vervoer','Variabel','Vervangend vervoer',47],['Variabele kosten','Poolbeheer','Pool','Pool',46],['Variabele kosten','Eindafrekening','Variabel','Variabel',48],['Variabele kosten','Beheervergoeding Pech/Schade','Variabel','Variabel',49],['Variabele kosten','Wassen','Variabel','Variabel',50],['Variabele kosten','Toll','Variabel','Variabel',51],['Variabele kosten','Parkeer kosten','Variabel','Variabel',52],['Variabele kosten','Overige','Variabel','Variabel',53],['Variabele kosten','Kentekenpapieren','Variabel','Variabel',54],['Variabele kosten','Beheer','Variabel','Variabel',55],['Variabele kosten','Veerpont','Variabel','Variabel',56],['Variabele kosten','Doorbelaste Hulpverlening','Variabel','Variabel',57],['Variabele kosten','Sleutels','Variabel','Variabel',58],['Variabele kosten','Laadpunt','Variabel','Variabel',59],['Variabele kosten','Verhuizing Laadpunt','Variabel','Variabel',60],['Variabele kosten','Herstel Laadpunt','Variabel','Variabel',61],['Variabele kosten','Administratiekosten Tol','Variabel','Variabel',62],['Variabele kosten','Vierseizoenen banden','Variabel','Variabel',63],['Variabele kosten','Achterstandsrente','Variabel','Variabel',64],
+['Brandstof','Diesel premium','Brandstof','Brandstof',17],['Brandstof','Benzine premium','Brandstof','Brandstof',18],['Brandstof','Benzine','Brandstof','Brandstof',19],['Brandstof','Brandstofpas fee','Brandstof','Brandstof',20],['Brandstof','Diesel','Brandstof','Brandstof',21],['Brandstof','Brandstofvoorschot','Brandstof','Brandstof',22],['Brandstof','Brandstof niet gespecificeerd','Brandstof','Brandstof',23],['Brandstof','LPG','Brandstof','Brandstof',24],['Brandstof','Brandstofafrekening','Brandstof','Brandstof',25],['Brandstof','AdBlue','Brandstof','Brandstof',26],['Brandstof','Elektriciteit','Brandstof','Brandstof',27],
+['STR','Huurtarief STR','Huur','Huurtarief',28],['STR','Beheervergoeding huur','Huur','Huur',29],['STR','Kilometerafrekening huur','Huur','Huur',30],
+['Contractuele kosten','Leasetarief','Contractueel','Leasetarief',1],['Contractuele kosten','Contract aanpassing','Contractueel','Contract aanpassing',2],['Contractuele kosten','Onderhoud','Contractueel','Leasetarief',3],['Contractuele kosten','Banden Contractueel','Contractueel','Leasetarief',4],['Contractuele kosten','Verzekering','Contractueel','Leasetarief',5],['Contractuele kosten','Meerkilometers','Contractueel','Contract aanpassing',6],['Contractuele kosten','Afschrijving','Contractueel','Leasetarief',7],['Contractuele kosten','Rente','Contractueel','Leasetarief',8],['Contractuele kosten','BPM','Contractueel','Leasetarief',9],['Contractuele kosten','Contractuele Hulpverlening','Contractueel','Leasetarief',10],['Contractuele kosten','WA/Casco','Contractueel','Leasetarief',11],['Contractuele kosten','OVI','Contractueel','Leasetarief',12],['Contractuele kosten','Vervangend vervoer premie','Contractueel','Leasetarief',13],['Contractuele kosten','MRB','Contractueel','Leasetarief',14],['Contractuele kosten','SVI','Contractueel','Leasetarief',15],['Contractuele kosten','Intrest','Contractueel','Leasetarief',16],
+['Schade kosten','Schade','Schade','Schade',31],['Schade kosten','Onderhoud doorbelast','Schade','Onderhoud doorbelast',32],['Schade kosten','Bandenschade','Schade','Bandenschade',33],['Schade kosten','Ruitschade','Schade','Ruitschade',34],['Schade kosten','Overige schadekosten','Schade','Overige schadekosten',35],['Schade kosten','Diefstal','Schade','Diefstal',36],['Schade kosten','Eigen risico','Schade','Eigen risico',37],
+['Pool kosten','Overige Pool','Pool','Pool',40],['Pool kosten','Transport Pool','Pool','Pool',41],['Pool kosten','Inname/uitgifte','Pool','Pool',42],['Pool kosten','Stalling','Pool','Pool',43],['Pool kosten','Reiniging','Pool','Pool',44],['Pool kosten','Schadeherstel Pool','Pool','Pool',45]
+];
+const PRODUCT_MAP=new Map(PRODUCT_ROWS.map(x=>[norm(x[0])+'|'+norm(x[1]),{a:x[2],b:x[3],order:x[4]}]));
+const REQUIRED=['Type_cout','Produit','Immat','Date','HT','Fournisseur'];
+let charts=[];
+const money0=new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const num0=new Intl.NumberFormat('nl-NL',{maximumFractionDigits:0});
+function norm(v){return String(v??'').trim().replace(/\s+/g,' ').toLocaleLowerCase('nl-NL')}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function amount(v){if(typeof v==='number'&&Number.isFinite(v))return v;let s=String(v??'').trim().replace(/[€\s]/g,'');if(!s)return 0;if(s.includes(',')&&s.includes('.'))s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');else if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const n=Number(s);return Number.isFinite(n)?n:0}
+function dateValue(v){if(v instanceof Date&&!isNaN(v))return v;if(typeof v==='number'){const x=XLSX.SSF.parse_date_code(v);return x?new Date(x.y,x.m-1,x.d):null}const s=String(v??'').trim();let m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);const d=new Date(s);return isNaN(d)?null:d}
+function productMeta(type,product){return PRODUCT_MAP.get(norm(type)+'|'+norm(product))||null}
+function readExcel(file){return file.arrayBuffer().then(buf=>{const wb=XLSX.read(buf,{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];const data=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});const headers=data.length?Object.keys(data[0]):[];const missing=REQUIRED.filter(h=>!headers.includes(h));if(missing.length)throw new Error(file.name+': ontbrekende kolommen: '+missing.join(', '));return data.map(r=>{const d=dateValue(r.Date),meta=productMeta(r.Type_cout,r.Produit),t=TYPE_MAP[String(r.Type_cout??'').trim()];return {...r,_date:d,_month:d?d.getMonth():null,_year:d?d.getFullYear():null,_amount:amount(r.HT),_type:t?.name||String(r.Type_cout||'Onbekend').trim()||'Onbekend',_typeOrder:t?.order??999,_a:meta?.a||t?.name||String(r.Type_cout||'Onbekend').trim()||'Onbekend',_b:meta?.b||String(r.Produit||'Onbekend').trim()||'Onbekend',_productOrder:meta?.order??999,_plate:String(r.Immat||'').trim(),_supplier:String(r.Fournisseur||'Onbekend').trim()||'Onbekend',_product:String(r.Produit||'Onbekend').trim()||'Onbekend'};});});}
+function sum(rows,filter=()=>true){return rows.reduce((a,r)=>a+(filter(r)?r._amount:0),0)}
+function monthSums(rows,filter=()=>true){return MONTHS.map((_,m)=>sum(rows,r=>r._month===m&&filter(r)))}
+function activeMonths(rows){return [...new Set(rows.filter(r=>r._month!==null).map(r=>r._month))].sort((a,b)=>a-b)}
+function years(rows){const a=[...new Set(rows.map(r=>r._year).filter(Number.isFinite))].sort();return a.length?a.join(', '):'onbekend jaar'}
+function destroyCharts(){charts.forEach(c=>c.destroy());charts=[]}
+function chartCanvas(id){return document.getElementById(id)}
+function commonOptions(){return {responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{font:{family:'Century Gothic',size:10},boxWidth:14}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.dataset.yAxisID==='count'?num0.format(c.raw):money0.format(c.raw)}`}}},scales:{x:{stacked:false,grid:{display:false},ticks:{font:{family:'Century Gothic',size:10}}},y:{beginAtZero:true,ticks:{callback:v=>money0.format(v),font:{family:'Century Gothic',size:9}}}}}}
+function barLabels(){return {anchor:'end',align:'end',clamp:true,formatter:v=>v?money0.format(v):'',font:{size:9,weight:'bold'},color:'#213153'}}
+function makeChart(id,config){const c=new Chart(chartCanvas(id),config);charts.push(c);return c}
+function section(title,body,cls=''){return `<section class="section ${cls}"><h2>${esc(title)}</h2>${body}</section>`}
+function canvas(id,tall=false){return `<div class="chart-wrap ${tall?'tall':''}"><canvas id="${id}"></canvas></div>`}
+function yearlyLine(rows,label,color,filter=()=>true){return {type:'line',label,data:monthSums(rows,filter),borderColor:color,backgroundColor:color,borderDash:[7,5],borderWidth:2,pointRadius:2,tension:.25,datalabels:{display:false}}}
+function validRows(rows){return rows.filter(r=>r._date&&Number.isFinite(r._amount))}
+function vehicleCounts(rows,kind){return MONTHS.map((_,m)=>new Set(rows.filter(r=>r._month===m&&((kind==='lease'&&norm(r._product)==='leasetarief')||(kind==='hire'&&norm(r._product)==='huurtarief str'))).map(r=>r._plate).filter(Boolean)).size)}
+function leaseMetrics(rows,supplier=null){const filtered=rows.filter(r=>norm(r._product)==='leasetarief'&&(!supplier||r._supplier===supplier));return MONTHS.map((_,m)=>{const mr=filtered.filter(r=>r._month===m),plates=new Set(mr.map(r=>r._plate).filter(Boolean)),total=sum(mr),count=plates.size;return {total,count,avg:count?total/count:0}})}
+function reportTable(headers,rows,classes=[]){return `<div class="table-block"><table class="report-table"><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr class="${classes[i]||''}">${r.map((v,j)=>`<td>${j?v:esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+function fmt(v){return num0.format(Math.round(v||0))}
+async function analyse(){const curFile=document.getElementById('currentFile').files[0],prevFile=document.getElementById('previousFile').files[0],status=document.getElementById('status');if(!curFile){status.innerHTML='<span class="error">Upload eerst ‘Kosten huidig jaar’.</span>';return}status.textContent='Bestanden worden verwerkt...';document.getElementById('analyseBtn').disabled=true;document.getElementById('pdfBtn').disabled=true;try{const [current,previous]=await Promise.all([readExcel(curFile),prevFile?readExcel(prevFile):Promise.resolve([])]);buildReport(validRows(current),validRows(previous));status.textContent=`Rapportage gereed: ${current.length.toLocaleString('nl-NL')} regels huidig jaar${prevFile?` en ${previous.length.toLocaleString('nl-NL')} regels vorig jaar`:''}.`;document.getElementById('pdfBtn').disabled=false}catch(e){console.error(e);status.innerHTML='<span class="error">'+esc(e.message||'Verwerking mislukt.')+'</span>'}finally{document.getElementById('analyseBtn').disabled=false}}
+function buildReport(current,previous){destroyCharts();const compare=previous.length>0,report=document.getElementById('report'),months=compare?[0,1,2,3,4,5,6,7,8,9,10,11]:activeMonths(current),labels=months.map(m=>MONTHS[m]);let html=`<div class="report-head"><h1>Kostenrapportage</h1><p>Huidig jaar: ${esc(years(current))}${compare?` &nbsp;|&nbsp; Vorig jaar: ${esc(years(previous))}`:''}</p></div>`;
+html+=section(compare?'Totale kosten per maand':'Totale kosten',canvas('totalMonth'));
+html+=section('Totale kosten per kostensoort',canvas('costType',true));
+html+=section('Aantal geprolongeerde voertuigen',canvas('vehicles'));
+html+=section('Gemiddelde prolongatiekosten en aantal leasevoertuigen (alle leveranciers)',canvas('avgAll'));
+const suppliers=[...new Set(current.filter(r=>norm(r._product)==='leasetarief').map(r=>r._supplier))].sort((a,b)=>a.localeCompare(b,'nl'));
+suppliers.forEach((s,i)=>{const id='supplier_'+i;html+=section(`Gemiddelde prolongatiekosten (${s})`,canvas(id)+`<div id="${id}_table"></div>`,'supplier-block')});
+html+=section('Gefactureerde kosten alle leveranciers','<div id="invoiceTables"></div>','invoice-section');
+report.innerHTML=html;report.classList.remove('hidden');document.getElementById('placeholder').classList.add('hidden');
+const curTotal=monthSums(current),prevTotal=monthSums(previous);makeChart('totalMonth',{type:'bar',data:{labels,datasets:[{label:`Huidig jaar ${years(current)}`,data:months.map(m=>curTotal[m]),backgroundColor:'#213153',borderRadius:3,datalabels:barLabels()},...(compare?[{type:'line',label:`Vorig jaar ${years(previous)}`,data:months.map(m=>prevTotal[m]),borderColor:'#7e8fa7',borderDash:[7,5],borderWidth:2,pointRadius:2,tension:.25,datalabels:{display:false}}]:[])]},options:commonOptions()});
+const presentTypes=Object.values(TYPE_MAP).sort((a,b)=>a.order-b.order).map(x=>x.name).filter(t=>current.some(r=>r._a===t));const ds=presentTypes.map((t,i)=>({label:t,data:months.map(m=>sum(current,r=>r._month===m&&r._a===t)),backgroundColor:['#213153','#36577f','#4f73a5','#698cb6','#84a4c7','#a3bad3','#c2d1e2'][i%7],borderRadius:2,datalabels:{display:false}}));let opts=commonOptions();opts.scales.x.stacked=true;opts.scales.y.stacked=true;makeChart('costType',{type:'bar',data:{labels,datasets:ds},options:opts});
+const leaseCur=vehicleCounts(current,'lease'),hireCur=vehicleCounts(current,'hire'),leasePrev=vehicleCounts(previous,'lease'),hirePrev=vehicleCounts(previous,'hire');opts=commonOptions();opts.scales.x.stacked=true;opts.scales.y.stacked=true;opts.scales.y.ticks.callback=v=>num0.format(v);makeChart('vehicles',{type:'bar',data:{labels,datasets:[{label:`Lease ${years(current)}`,data:months.map(m=>leaseCur[m]),backgroundColor:'#213153',stack:'current',datalabels:{display:false}},{label:`Huur ${years(current)}`,data:months.map(m=>hireCur[m]),backgroundColor:'#82a6d2',stack:'current',datalabels:{anchor:'end',align:'end',formatter:(v,c)=>num0.format(leaseCur[months[c.dataIndex]]+hireCur[months[c.dataIndex]]),font:{weight:'bold'},color:'#213153'}},...(compare?[{type:'line',label:`Lease ${years(previous)}`,data:months.map(m=>leasePrev[m]),borderColor:'#213153',borderDash:[7,5],pointRadius:1,stack:'leasePrev',datalabels:{display:false}},{type:'line',label:`Huur ${years(previous)}`,data:months.map(m=>hirePrev[m]),borderColor:'#82a6d2',borderDash:[7,5],pointRadius:1,stack:'hirePrev',datalabels:{display:false}}]:[])]},options:opts});
+const all=leaseMetrics(current);opts=commonOptions();opts.scales.count={position:'right',beginAtZero:true,grid:{drawOnChartArea:false},ticks:{callback:v=>num0.format(v)}};makeChart('avgAll',{type:'bar',data:{labels:months.map(m=>MONTHS[m]),datasets:[{label:'Prolongatiekosten',data:months.map(m=>all[m].avg),backgroundColor:'#213153',datalabels:barLabels()},{type:'line',label:'Aantal leasevoertuigen',data:months.map(m=>all[m].count),yAxisID:'count',borderColor:'#82a6d2',backgroundColor:'#82a6d2',tension:.2,pointRadius:3,datalabels:{display:false}}]},options:opts});
+suppliers.forEach((s,i)=>{const met=leaseMetrics(current,s),id='supplier_'+i;opts=commonOptions();opts.scales.count={position:'right',beginAtZero:true,grid:{drawOnChartArea:false},ticks:{callback:v=>num0.format(v)}};makeChart(id,{type:'bar',data:{labels:months.map(m=>MONTHS[m]),datasets:[{label:'Prolongatiekosten',data:months.map(m=>met[m].avg),backgroundColor:'#213153',datalabels:barLabels()},{type:'line',label:'Aantal leasevoertuigen',data:months.map(m=>met[m].count),yAxisID:'count',borderColor:'#82a6d2',backgroundColor:'#82a6d2',tension:.2,pointRadius:3,datalabels:{display:false}}]},options:opts});const tableRows=[['Prolongatiekosten',...months.map(m=>fmt(met[m].total))],['Aantal voertuigen',...months.map(m=>fmt(met[m].count))],['Gemiddeld per voertuig',...months.map(m=>fmt(met[m].avg))]];document.getElementById(id+'_table').innerHTML=`<p class="table-title">${esc(s)}</p>`+reportTable(['Leverancier',...months.map(m=>MONTHS[m])],tableRows)});
+buildInvoiceTables(current,months);
 }
-function excelDate(v){
-    if(v instanceof Date && !isNaN(v)) return new Date(v.getFullYear(),v.getMonth(),v.getDate());
-    if(typeof v==='number' && Number.isFinite(v)){
-        const parsed=XLSX.SSF.parse_date_code(v);
-        return parsed?new Date(parsed.y,parsed.m-1,parsed.d):null;
-    }
-    const s=String(v??'').trim();
-    if(!s) return null;
-    let m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);
-    if(m) return new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));
-    m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
-    if(m) return new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
-    const d=new Date(s);
-    return isNaN(d)?null:d;
-}
-function monthKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
-function monthLabel(key){const [y,m]=key.split('-').map(Number);return monthFmt.format(new Date(y,m-1,1)).replace('.','');}
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
-function destroyCharts(){Object.keys(charts).forEach(k=>{charts[k].destroy();delete charts[k];});}
-function baseOptions(horizontal=false){
-    return {
-        responsive:true,
-        maintainAspectRatio:false,
-        animation:false,
-        indexAxis:horizontal?'y':'x',
-        layout:{padding:{top:5,right:10,bottom:5,left:5}},
-        plugins:{legend:{display:false}},
-        scales:{
-            x:{ticks:{autoSkip:true,maxRotation:0,font:{family:'Century Gothic',size:10}},grid:{display:false}},
-            y:{ticks:{font:{family:'Century Gothic',size:10}},beginAtZero:true}
-        }
-    };
-}
-async function analyse(){
-    const f=document.getElementById('file').files[0];
-    if(!f){document.getElementById('status').textContent='Kies eerst een Excel-bestand.';return;}
-    document.getElementById('status').textContent='Bestand wordt verwerkt...';
-    const buffer=await f.arrayBuffer();
-    const wb=XLSX.read(buffer,{type:'array',cellDates:true});
-    const ws=wb.Sheets[wb.SheetNames[0]];
-    rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
-    build();
-    document.getElementById('pdfButton').disabled=false;
-    document.getElementById('status').textContent=`${rows.length.toLocaleString('nl-NL')} regels verwerkt.`;
-}
-function build(){
-    destroyCharts();
-    let total=0;
-    const month={},supplier={},category={},vehicle={};
-    rows.forEach(r=>{
-        const amt=parseAmount(r.HT);
-        total+=amt;
-        const d=excelDate(r.Date);
-        if(d && !isNaN(d)){
-            const key=monthKey(d);
-            month[key]=(month[key]||0)+amt;
-        }
-        const sup=String(r.Fournisseur||'Onbekend').trim()||'Onbekend';
-        const cat=String(r.Type_cout||'Onbekend').trim()||'Onbekend';
-        const veh=String(r.Immat||'Onbekend').trim()||'Onbekend';
-        supplier[sup]=(supplier[sup]||0)+amt;
-        category[cat]=(category[cat]||0)+amt;
-        vehicle[veh]=(vehicle[veh]||0)+amt;
-    });
-    const months=Object.keys(month).sort();
-    const latest=months.length?month[months.at(-1)]:0;
-    const previous=months.length>1?month[months.at(-2)]:0;
-    const diff=latest-previous;
-    const pct=previous!==0?(diff/Math.abs(previous))*100:null;
-    const topSuppliers=Object.entries(supplier).sort((a,b)=>b[1]-a[1]);
-    const topCategories=Object.entries(category).sort((a,b)=>b[1]-a[1]);
-    const topVehicles=Object.entries(vehicle).filter(([k])=>k!=='Onbekend').sort((a,b)=>b[1]-a[1]).slice(0,10);
-    const topSup=topSuppliers[0]||['Geen data',0];
-    const topCat=topCategories[0]||['Geen data',0];
-    const latestLabel=months.length?monthLabel(months.at(-1)):'geen geldige maand';
-    const changeText=pct===null?'Niet berekenbaar':`${diff>=0?'stijging':'daling'} van ${Math.abs(pct).toLocaleString('nl-NL',{maximumFractionDigits:1})}% (${eur.format(Math.abs(diff))})`;
-    document.getElementById('summary').innerHTML=`
-        De totale kosten in het bestand bedragen <strong>${eur.format(total)}</strong>.<br>
-        De kosten in ${esc(latestLabel)} bedragen <strong>${eur.format(latest)}</strong>.<br>
-        Ten opzichte van de voorafgaande beschikbare maand is sprake van een <strong>${esc(changeText)}</strong>.<br>
-        De grootste leverancier is <strong>${esc(topSup[0])}</strong> met ${eur.format(topSup[1])}.<br>
-        De grootste kostensoort is <strong>${esc(topCat[0])}</strong> met ${eur.format(topCat[1])}.`;
-    document.getElementById('kpis').innerHTML=`
-        <div class="kpi">Totale kosten<strong>${eur.format(total)}</strong></div>
-        <div class="kpi">Factuurregels<strong>${rows.length.toLocaleString('nl-NL')}</strong></div>
-        <div class="kpi">Leveranciers<strong>${Object.keys(supplier).length.toLocaleString('nl-NL')}</strong></div>
-        <div class="kpi">Kostensoorten<strong>${Object.keys(category).length.toLocaleString('nl-NL')}</strong></div>`;
-    charts.month=new Chart(document.getElementById('monthChart'),{
-        type:'line',
-        data:{labels:months.map(monthLabel),datasets:[{label:'Kosten per maand',data:months.map(m=>month[m]),borderColor:'#213153',backgroundColor:'rgba(33,49,83,.12)',fill:true,tension:.25,pointRadius:3}]},
-        options:{...baseOptions(false),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>eur.format(c.raw)}}}}
-    });
-    const top15=topSuppliers.slice(0,15);
-    charts.supplier=new Chart(document.getElementById('supplierChart'),{
-        type:'bar',
-        data:{labels:top15.map(x=>x[0]),datasets:[{data:top15.map(x=>x[1]),backgroundColor:'#213153'}]},
-        options:{...baseOptions(true),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>eur.format(c.raw)}}}}
-    });
-    charts.category=new Chart(document.getElementById('categoryChart'),{
-        type:'doughnut',
-        data:{labels:topCategories.map(x=>x[0]),datasets:[{data:topCategories.map(x=>x[1]),backgroundColor:['#213153','#3f5f91','#6684ad','#8da7c9','#b4c9df','#d5e0ed','#677185','#9ba4b4']}]},
-        options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{family:'Century Gothic',size:10}}},tooltip:{callbacks:{label:c=>`${c.label}: ${eur.format(c.raw)}`}}}}
-    });
-    charts.vehicle=new Chart(document.getElementById('vehicleChart'),{
-        type:'bar',
-        data:{labels:topVehicles.map(x=>x[0]),datasets:[{data:topVehicles.map(x=>x[1]),backgroundColor:'#3f5f91'}]},
-        options:{...baseOptions(false),plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>eur.format(c.raw)}}}}
-    });
-    document.getElementById('supTable').innerHTML='<thead><tr><th>Leverancier</th><th>Bedrag excl. btw</th></tr></thead><tbody>'+topSuppliers.map(x=>`<tr><td>${esc(x[0])}</td><td>${eur.format(x[1])}</td></tr>`).join('')+'</tbody>';
-}
-async function pdf(){
-    const report=document.getElementById('report');
-    const button=document.getElementById('pdfButton');
-    const status=document.getElementById('status');
-    button.disabled=true;
-    status.textContent='PDF wordt opgebouwd...';
-    Object.values(charts).forEach(c=>c.resize());
-    await document.fonts.ready;
-    await new Promise(resolve=>setTimeout(resolve,250));
-    try{
-        await html2pdf().set({
-            margin:[10,10,10,10],
-            filename:'TraXall_Kostenrapportage.pdf',
-            image:{type:'jpeg',quality:.98},
-            html2canvas:{scale:1.3,useCORS:true,scrollX:0,scrollY:0,backgroundColor:'#ffffff'},
-            pagebreak:{mode:['css','legacy'],avoid:['.chart-container','canvas']},
-            jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true}
-        }).from(report).save();
-        status.textContent='PDF is gegenereerd.';
-    }catch(err){
-        console.error(err);
-        status.textContent='PDF-export mislukt. Open de browserconsole voor details.';
-    }finally{
-            Object.values(charts).forEach(c=>c.resize());
-        button.disabled=false;
-    }
-}
+function buildInvoiceTables(current,months){const host=document.getElementById('invoiceTables');const types=Object.values(TYPE_MAP).sort((a,b)=>a.order-b.order).filter(t=>current.some(r=>r._type===t.name));let html='';types.forEach(t=>{const rows=current.filter(r=>r._type===t.name),specs=[...new Map(rows.map(r=>[norm(r._product),{name:r._product,order:r._productOrder}])).values()].sort((a,b)=>a.order-b.order||a.name.localeCompare(b.name,'nl'));const body=specs.map(s=>[s.name,...months.map(m=>fmt(sum(rows,r=>r._month===m&&norm(r._product)===norm(s.name))))]);body.push([`Subtotaal ${t.name}`,...months.map(m=>fmt(sum(rows,r=>r._month===m)))]);html+=`<p class="table-title">${esc(t.name)}</p>`+reportTable(['Kostensoort',...months.map(m=>MONTHS[m])],body,body.map((_,i)=>i===body.length-1?'subtotal':''))});host.innerHTML=html||'<p>Geen gefactureerde kosten gevonden.</p>'}
+async function exportPdf(){const status=document.getElementById('status'),btn=document.getElementById('pdfBtn');btn.disabled=true;status.textContent='PDF wordt opgebouwd...';await document.fonts.ready;charts.forEach(c=>c.resize());await new Promise(r=>setTimeout(r,300));try{await html2pdf().set({margin:[8,8,8,8],filename:'TraXall_Kostenrapportage.pdf',image:{type:'jpeg',quality:.96},html2canvas:{scale:1.15,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},pagebreak:{mode:['css','legacy'],avoid:['.chart-wrap','.table-block']},jsPDF:{unit:'mm',format:'a4',orientation:'landscape',compress:true}}).from(document.getElementById('report')).save();status.textContent='PDF is gegenereerd.'}catch(e){console.error(e);status.innerHTML='<span class="error">PDF-export mislukt. Controleer de browserconsole.</span>'}finally{btn.disabled=false;charts.forEach(c=>c.resize())}}
+document.getElementById('previousFile').addEventListener('change',e=>document.getElementById('previousName').textContent=e.target.files[0]?.name||'Geen bestand');
+document.getElementById('currentFile').addEventListener('change',e=>document.getElementById('currentName').textContent=e.target.files[0]?.name||'Geen bestand');
+document.getElementById('analyseBtn').addEventListener('click',analyse);document.getElementById('pdfBtn').addEventListener('click',exportPdf);
 </script>
 </body>
 </html>
